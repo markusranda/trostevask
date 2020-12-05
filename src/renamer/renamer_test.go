@@ -1,6 +1,7 @@
 package renamer
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"testing"
@@ -13,6 +14,7 @@ func init() {
 		"jason_borne_identity_2002 CONTRIBUTE TO MOVIEMASTERS.mp4",
 		"the great escape (1963).mkv",
 		"Black Swan 2010 dddddd.mkv"}
+	fmt.Print(testFileNames)
 	generateTestFiles()
 }
 
@@ -21,6 +23,9 @@ func RenameNonLowerCaseLowercase(t *testing.T) {
 	correctFileName := "pirates of the carribean 2003 bluray xhaxx0r.mp4"
 	newFileName := rename(oldFileName)
 
+	fmt.Print(oldFileName)
+	fmt.Print(correctFileName)
+	fmt.Print(newFileName)
 	if newFileName != correctFileName {
 		t.Error("rename was incorrect, should be all lowercase")
 	}
@@ -29,6 +34,8 @@ func RenameNonLowerCaseLowercase(t *testing.T) {
 func generateTestFiles() {
 
 	for i := 0; i < len(testFileNames); i++ {
+		fmt.Print(testFileNames[i])
+
 		createFile(testFileNames[i])
 	}
 }
@@ -36,7 +43,7 @@ func generateTestFiles() {
 func createFile(filename string) {
 	bytes := []byte(filename)
 	err := ioutil.WriteFile("../../test_files/"+filename, bytes, 0644)
-
+	fmt.Print(filename)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,8 +1,12 @@
 package renamer
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 func rename(filename string) string {
+	fmt.Print(filename)
 	formattedString := strings.ToLower(filename)
 	return formattedString
 }
