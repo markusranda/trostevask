@@ -43,7 +43,7 @@ func MoveFile(oldLocation string, newLocation string) {
 	}
 }
 
-func GetRelativeFileNamesFromDir(dir string) (files []string) {
+func GetFileNamesFromDir(dir string) (files []string) {
     var fileInfoArray = getFilesFromDir(dir)
 
     for i := 0; i < len(fileInfoArray); i++ {

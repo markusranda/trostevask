@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/markusranda/trostevask/pkg/filemanager"
 )
 
@@ -20,7 +18,13 @@ func main() {
 	println("")
 
 	// Move dirty files to processing
+	println("Moving dirty files to processing")
+	println("")
 	moveDirtyFiles()
+
+	println("Read all processing files")
+	filemanager.ReadAndPrintFiles("./test_files/processing")
+	println("")
 
 	// Rename all files in processing
 
@@ -43,11 +47,13 @@ func generateTestFiles(testFileNames []string) {
 }
 
 func moveDirtyFiles() {
-	var fileNameList = filemanager.GetRelativeFileNamesFromDir("./test_files/dirty/")
+	var fileNameList = filemanager.GetFileNamesFromDir("./test_files/dirty/")
 	
-	fmt.Printf("len=%d cap=%d %v\n", len(fileNameList), cap(fileNameList), fileNameList)
-
-	// filemanager.MoveFile()
+    for _, filename := range fileNameList {
+		var oldFilename = "./test_files/dirty/" + filename
+		var newFilename = "./test_files/processing/" + filename
+		filemanager.MoveFile(oldFilename, newFilename)	
+	}
 }
 
 
