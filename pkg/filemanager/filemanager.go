@@ -43,6 +43,16 @@ func MoveFile(oldLocation string, newLocation string) {
 	}
 }
 
+func MoveFilesFromTo(oldLocation string, newLocation string) {
+    var fileNameList = GetFileNamesFromDir(oldLocation)
+	
+    for _, filename := range fileNameList {
+		var oldFilename = oldLocation + filename
+		var newFilename = newLocation + filename
+		MoveFile(oldFilename, newFilename)	
+	}
+}
+
 func GetFileNamesFromDir(dir string) (files []string) {
     var fileInfoArray = getFilesFromDir(dir)
 

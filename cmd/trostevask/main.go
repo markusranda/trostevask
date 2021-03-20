@@ -36,6 +36,15 @@ func main() {
 	filemanager.ReadAndPrintFiles("./test_files/processing")
 	println("")
 
+	// Place processed items in clean dir
+	println("Moving processed files to clean")
+	println("")
+	filemanager.MoveFilesFromTo("./test_files/processing/", "./test_files/clean/")
+
+	println("Read all cleaned files")
+	filemanager.ReadAndPrintFiles("./test_files/clean")
+	println("")
+
 	disposeOldFiles()
 }
 
