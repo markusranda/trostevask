@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/markusranda/trostevask/pkg/filemanager"
+	"github.com/markusranda/trostevask/pkg/renamer"
 )
 
 
@@ -27,6 +28,13 @@ func main() {
 	println("")
 
 	// Rename all files in processing
+	println("Cleaning up filenames")
+	println("")
+	cleanFilenames()
+
+	println("Read all processed files")
+	filemanager.ReadAndPrintFiles("./test_files/processing")
+	println("")
 
 	disposeOldFiles()
 }
@@ -35,7 +43,8 @@ func setupTestEnvironment() {
 	var testFileNames = []string{"Pirates of the carribEan 2003 blurAy xHaxx0r.mp4",
 		"jason_borne_identity_2002 CONTRIBUTE TO MOVIEMASTERS.mp4",
 		"the great escape (1963).mkv",
-		"Black Swan 2010 dddddd.mkv"}
+		"Black Swan 2010 dddddd.mkv",
+		"2001.A.Space.Odyssey.1968.720p.BluRay.DD5.1.x264-LiNG.mkv"}
 	generateTestFiles(testFileNames)
 }
 
@@ -43,6 +52,18 @@ func setupTestEnvironment() {
 func generateTestFiles(testFileNames []string) {
 	for i := 0; i < len(testFileNames); i++ {
 		filemanager.CreateFile("./test_files/dirty/", testFileNames[i])
+	}
+}
+
+func cleanFilenames() {
+	var fileNameList = filemanager.GetFileNamesFromDir("./test_files/processing/")
+
+	basePath := "./test_files/processing/"
+
+	for _, filename := range fileNameList {
+		var oldFilename = basePath + filename
+		var newFilename = basePath + renamer.GetCleanFilename(filename)
+		filemanager.MoveFile(oldFilename, newFilename)	
 	}
 }
 
