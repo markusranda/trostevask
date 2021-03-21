@@ -36,6 +36,13 @@ func CreateFile(dir string, filename string) {
 	}
 }
 
+func CreateDir(dir string, permissions os.FileMode) {
+    err := os.Mkdir(dir, permissions)
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+
 func MoveFile(oldLocation string, newLocation string) {
     err := os.Rename(oldLocation, newLocation)
 	if err != nil {

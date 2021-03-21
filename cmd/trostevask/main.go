@@ -1,10 +1,12 @@
 package main
 
 import (
+	"log"
+
+	"github.com/markusranda/trostevask/pkg/consts"
 	"github.com/markusranda/trostevask/pkg/filemanager"
 	"github.com/markusranda/trostevask/pkg/renamer"
 )
-
 
 func main() {
 	println("---------------------Started trostevask---------------------")
@@ -44,18 +46,38 @@ func main() {
 }
 
 func setupTestEnvironment() {
-	var testFileNames = []string{"Pirates of the carribEan 2003 blurAy xHaxx0r.mp4",
+	movieTestFiles := []string{
+		"Pirates of the carribEan 2003 blurAy xHaxx0r.mp4",
 		"jason_borne_identity_2002 CONTRIBUTE TO MOVIEMASTERS.mp4",
 		"the great escape (1963).mkv",
 		"Black Swan 2010 dddddd.mkv",
-		"2001.A.Space.Odyssey.1968.720p.BluRay.DD5.1.x264-LiNG.mkv"}
-	generateTestFiles(testFileNames)
+		"2001.A.Space.Odyssey.1968.720p.BluRay.DD5.1.x264-LiNG.mkv",
+	}
+	generateMovieTestFiles(movieTestFiles)
+
+	tvShowTestFiles := []string{
+		"Bobs.Burgers.S04E12.WEB.x264-PHOENiX[TGx]",
+		"Stargate SG1 Complete 1997-2007 DVD Rip x264 AC3-MEECH",
+		"Stargate Atlantis S01-05 BR 10bit ace hevc-",
+		"Batwoman.S02E07.XviD-AFG[TGx]",
+		"Bleach 1-366 + Movies Batch Complete",
+		"Bleach Season 13 English Dubbed HD",
+	}
+	generateTvShowTestFiles(tvShowTestFiles)
+
+	filemanager.CreateDir("./test_files/clean/movies", 0755)
+	filemanager.CreateDir("./test_files/clean/tv_shows", 0755)
 }
 
+func generateTvShowTestFiles(testFiles []string) {
+	for i := 0; i < len(testFiles); i++ {
+		filemanager.CreateDir("./test_files/dirty/" + testFiles[i], 0755)
+	}
+}
 
-func generateTestFiles(testFileNames []string) {
-	for i := 0; i < len(testFileNames); i++ {
-		filemanager.CreateFile("./test_files/dirty/", testFileNames[i])
+func generateMovieTestFiles(testFiles []string) {
+	for i := 0; i < len(testFiles); i++ {
+		filemanager.CreateFile("./test_files/dirty/", testFiles[i])
 	}
 }
 
@@ -66,9 +88,29 @@ func cleanFilenames() {
 	basePathClean := "./test_files/clean/"
 
 	for _, filename := range fileNameList {
+
 		println("Cleaning file: " + filename)
+
 		var oldFilename = basePathProcessing + filename
-		var newFilename = basePathClean + renamer.GetCleanFilename(filename)
+		var newFilename = basePathClean
+		var err error
+		var cleanFilename string
+		
+		// Figure out if file is tv show or movie
+		if (renamer.IsTvShowFileName(filename)) {
+			cleanFilename, err = renamer.GetCleanFilename(filename, consts.TvShow)
+			newFilename += "tv_shows/"
+			newFilename += cleanFilename
+		} else {
+			cleanFilename, err = renamer.GetCleanFilename(filename, consts.Movie)
+			newFilename += "movies/"
+			newFilename += cleanFilename
+		}
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		filemanager.MoveFile(oldFilename, newFilename)
 	}
 }
