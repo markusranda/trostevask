@@ -27,8 +27,3 @@ func CleanMovieName(filename string) (cleanFilename string) {
 
 	return
 }
-
-func IsTvShowFileName(filename string) (isTvShow bool) {
-	regex := regexp.MustCompile(`(?i:complete|S0\d|Season)`)
-	return regex.MatchString(filename)
-}

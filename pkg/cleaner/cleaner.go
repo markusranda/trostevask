@@ -1,25 +1,23 @@
 package cleaner
 
 import (
-	"errors"
+	"regexp"
 
-	"github.com/markusranda/trostevask/pkg/consts"
 	"github.com/markusranda/trostevask/pkg/renamer"
 )
 
-func GetCleanFilename(filename string, fileType string) (cleanFilename string, err error) {
+func GetCleanFilename(filename string) (cleanFilename string) {
 
-	switch fileType {
-
-	case consts.TvShow:
-		cleanFilename = renamer.CleanTvShowName(filename)
-
-	case consts.Movie:
-		cleanFilename = renamer.CleanMovieName(filename)
-
-	default:
-		err = errors.New(`None of the applicable fileTypes were specified, ` + fileType + " where used instead..")
+	if (isTvShowFileName(filename)) {
+		cleanFilename = "tv_shows/" + renamer.CleanTvShowName(filename)
+	} else {
+		cleanFilename = "movies/" + renamer.CleanMovieName(filename)
 	}
 
 	return
+}
+
+func isTvShowFileName(filename string) (isTvShow bool) {
+	regex := regexp.MustCompile(`(?i:complete|S0\d|Season)`)
+	return regex.MatchString(filename)
 }
