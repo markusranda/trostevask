@@ -9,7 +9,7 @@ func main() {
 	println("---------------------Started trostevask---------------------")
 	println("")
 
-	disposeOldFiles()
+	disposeFiles()
 
 	setupTestEnvironment()
 
@@ -17,29 +17,16 @@ func main() {
 	filemanager.ReadAndPrintFiles("./test_files/dirty")
 	println("")
 
-	// Move dirty files to processing
-	println("Moving dirty files to processing")
-	println("")
-	moveDirtyFiles()
-
-	println("Read all processing files")
-	filemanager.ReadAndPrintFiles("./test_files/processing")
-	println("")
-
-	// Rename and move processed files
 	println("Cleaning up filenames")
 	println("")
 	cleanFilenames()
 
-	println("Read all processed files")
-	filemanager.ReadAndPrintFiles("./test_files/processing")
-	println("")
-
 	println("Read all cleaned files")
+	println("")
 	filemanager.ReadAndPrintFiles("./test_files/clean")
 	println("")
 
-	disposeOldFiles()
+	disposeFiles()
 }
 
 func setupTestEnvironment() {
@@ -79,9 +66,9 @@ func generateMovieTestFiles(testFiles []string) {
 }
 
 func cleanFilenames() {
-	var fileNameList = filemanager.GetFileNamesFromDir("./test_files/processing/")
+	var fileNameList = filemanager.GetFileNamesFromDir("./test_files/dirty/")
 
-	basePathProcessing := "./test_files/processing/"
+	basePathProcessing := "./test_files/dirty/"
 	basePathClean := "./test_files/clean/"
 
 	for _, filename := range fileNameList {
@@ -94,19 +81,8 @@ func cleanFilenames() {
 	}
 }
 
-func moveDirtyFiles() {
-	var fileNameList = filemanager.GetFileNamesFromDir("./test_files/dirty/")
-	
-    for _, filename := range fileNameList {
-		var oldFilename = "./test_files/dirty/" + filename
-		var newFilename = "./test_files/processing/" + filename
-		filemanager.MoveFile(oldFilename, newFilename)	
-	}
-}
-
-
-func disposeOldFiles() {
+func disposeFiles() {
+	println("Disposing all files")
 	filemanager.RemoveContents("./test_files/dirty/")
-	filemanager.RemoveContents("./test_files/processing/")
 	filemanager.RemoveContents("./test_files/clean/")
 }
