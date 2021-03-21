@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/markusranda/trostevask/pkg/cleaner"
 	"github.com/markusranda/trostevask/pkg/consts"
 	"github.com/markusranda/trostevask/pkg/filemanager"
 	"github.com/markusranda/trostevask/pkg/renamer"
@@ -98,11 +99,11 @@ func cleanFilenames() {
 		
 		// Figure out if file is tv show or movie
 		if (renamer.IsTvShowFileName(filename)) {
-			cleanFilename, err = renamer.GetCleanFilename(filename, consts.TvShow)
+			cleanFilename, err = cleaner.GetCleanFilename(filename, consts.TvShow)
 			newFilename += "tv_shows/"
 			newFilename += cleanFilename
 		} else {
-			cleanFilename, err = renamer.GetCleanFilename(filename, consts.Movie)
+			cleanFilename, err = cleaner.GetCleanFilename(filename, consts.Movie)
 			newFilename += "movies/"
 			newFilename += cleanFilename
 		}
