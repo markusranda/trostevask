@@ -27,7 +27,7 @@ func main() {
 	filemanager.ReadAndPrintFiles("./test_files/processing")
 	println("")
 
-	// Rename all files in processing
+	// Rename and move processed files
 	println("Cleaning up filenames")
 	println("")
 	cleanFilenames()
@@ -35,11 +35,6 @@ func main() {
 	println("Read all processed files")
 	filemanager.ReadAndPrintFiles("./test_files/processing")
 	println("")
-
-	// Place processed items in clean dir
-	println("Moving processed files to clean")
-	println("")
-	filemanager.MoveFilesFromTo("./test_files/processing/", "./test_files/clean/")
 
 	println("Read all cleaned files")
 	filemanager.ReadAndPrintFiles("./test_files/clean")
@@ -67,12 +62,14 @@ func generateTestFiles(testFileNames []string) {
 func cleanFilenames() {
 	var fileNameList = filemanager.GetFileNamesFromDir("./test_files/processing/")
 
-	basePath := "./test_files/processing/"
+	basePathProcessing := "./test_files/processing/"
+	basePathClean := "./test_files/clean/"
 
 	for _, filename := range fileNameList {
-		var oldFilename = basePath + filename
-		var newFilename = basePath + renamer.GetCleanFilename(filename)
-		filemanager.MoveFile(oldFilename, newFilename)	
+		println("Cleaning file: " + filename)
+		var oldFilename = basePathProcessing + filename
+		var newFilename = basePathClean + renamer.GetCleanFilename(filename)
+		filemanager.MoveFile(oldFilename, newFilename)
 	}
 }
 
