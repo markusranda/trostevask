@@ -84,3 +84,8 @@ func getFilesFromDir(dir string) (files []os.FileInfo) {
     }
     return
 }
+
+func IsFolder(filename string) (isFolder bool) {
+    info, _ := os.Stat(filename)
+    return info.IsDir() 
+}
