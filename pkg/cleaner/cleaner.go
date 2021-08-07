@@ -38,9 +38,9 @@ func GetCleanFilename(file filemanager.FullFileInfo) (cleanFile filemanager.Full
 
 func IsNotValidated(file filemanager.FullFileInfo) bool {
 	re := regexp.MustCompile(`(?m).+mp4|avi|mkv`)
-	fileExtensionExists := re.MatchString(file.Name())
-	if !fileExtensionExists {
-		logrus.Error("No file extension found for: " + file.Name())
+	validFileExtensionExists := re.MatchString(file.Name())
+	if !validFileExtensionExists {
+		logrus.Error("Invalid or missing file extension: " + file.Name())
 		return true
 	}
 

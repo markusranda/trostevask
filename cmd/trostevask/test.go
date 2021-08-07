@@ -27,12 +27,23 @@ func setupTestEnvironment() {
 		"True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD",
 	}
 
-	generateTvShowTestFiles(tvShowTestDirs)
+	testFiles := []string{
+		"flame-man.on.fire.2004.proper.1080p.bluray.x264.rar",
+		"man.on.fire.1080p-japhson.png",
+		"flame-man.on.fire.2004.proper.1080p.bluray.x264.nfo",
+		"man.on.fire.1080p-japhson.png",
+	}
+
+	generateTvShowTestFiles(tvShowTestDirs, testFiles)
 }
 
-func generateTvShowTestFiles(tvShowTestDirs []string) {
+func generateTvShowTestFiles(tvShowTestDirs []string, testFiles []string) {
 	for i := 0; i < len(tvShowTestDirs); i++ {
 		filemanager.CreateDirSkipIfExists(filemanager.GetInputDir()+tvShowTestDirs[i], 0755)
+	}
+
+	for i := 0; i < len(testFiles); i++ {
+		filemanager.CreateFileSkipIfExists(filemanager.GetInputDir(), testFiles[i])
 	}
 
 	filemanager.CreateFileSkipIfExists(filemanager.GetInputDir()+"True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",

@@ -65,6 +65,11 @@ func cleanFilenames() {
 			continue
 		}
 
+		if cleaner.IsNotValidated(file) {
+			log.Info("Skipping file: " + file.Name())
+			continue
+		}
+
 		log.Info("Cleaning file: " + file.Name())
 
 		if cleaner.IsNotValidated(file) {
@@ -80,7 +85,7 @@ func cleanFilenames() {
 			continue
 		}
 
-		log.Info("Moving file: " + cleanFile.Path)
+		log.Info("Copying file: " + cleanFile.Path)
 		err := filemanager.CopyFile(file.Path, filemanager.GetOutputDir()+cleanFile.Path)
 		if err != nil {
 			log.Fatal(err)
