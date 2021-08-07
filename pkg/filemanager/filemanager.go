@@ -2,6 +2,8 @@ package filemanager
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -9,22 +11,22 @@ import (
 )
 
 func RemoveContents(dir string) error {
-    d, err := os.Open(dir)
-    if err != nil {
-        return err
-    }
-    defer d.Close()
-    names, err := d.Readdirnames(-1)
-    if err != nil {
-        return err
-    }
-    for _, name := range names {
-        err = os.RemoveAll(filepath.Join(dir, name))
-        if err != nil {
-            return err
-        }
-    }
-    return nil
+	d, err := os.Open(dir)
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		return err
+	}
+	for _, name := range names {
+		err = os.RemoveAll(filepath.Join(dir, name))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func CreateFile(dir string, filename string) {
@@ -37,86 +39,163 @@ func CreateFile(dir string, filename string) {
 }
 
 func CreateDir(dir string, permissions os.FileMode) {
-    err := os.Mkdir(dir, permissions)
-    if err != nil {
-        log.Fatal(err)
-    }
-}
-
-func MoveFile(oldLocation string, newLocation string) {
-    err := os.Rename(oldLocation, newLocation)
+	err := os.Mkdir(dir, permissions)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
+func CreateDirIfNotExists(dir string, permissions os.FileMode) {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err := os.Mkdir(dir, permissions)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	}
+}
+
+func MoveFile(oldLocation string, newLocation string) {
+	err := os.Rename(oldLocation, newLocation)
+	if err != nil {
+		logrus.Error(err.Error())
+	}
+}
+
+func CopyFile(src string, dst string) (err error) {
+	sfi, err := os.Stat(src)
+	if err != nil {
+		return
+	}
+	if !sfi.Mode().IsRegular() {
+		// cannot copy non-regular files (e.g., directories,
+		// symlinks, devices, etc.)
+		return fmt.Errorf("CopyFile: non-regular source file %s (%q)", sfi.Name(), sfi.Mode().String())
+	}
+	dfi, err := os.Stat(dst)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return
+		}
+	} else {
+		if !(dfi.Mode().IsRegular()) {
+			return fmt.Errorf("CopyFile: non-regular destination file %s (%q)", dfi.Name(), dfi.Mode().String())
+		}
+		if os.SameFile(sfi, dfi) {
+			return
+		}
+	}
+	if err = os.Link(src, dst); err == nil {
+		return
+	}
+	err = copyFileContents(src, dst)
+	return
+}
+
+// copyFileContents copies the contents of the file named src to the file named
+// by dst. The file will be created if it does not already exist. If the
+// destination file exists, all it's contents will be replaced by the contents
+// of the source file.
+func copyFileContents(src, dst string) (err error) {
+	in, err := os.Open(src)
+	if err != nil {
+		return
+	}
+	defer in.Close()
+	out, err := os.Create(dst)
+	if err != nil {
+		return
+	}
+	defer func() {
+		cerr := out.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+	if _, err = io.Copy(out, in); err != nil {
+		return
+	}
+	err = out.Sync()
+	return
+}
+
 func MoveFilesFromTo(oldLocation string, newLocation string) {
-    var fileNameList = GetFileNamesFromDir(oldLocation)
-	
-    for _, filename := range fileNameList {
+	var fileNameList = GetFileNamesFromDir(oldLocation)
+
+	for _, filename := range fileNameList {
 		var oldFilename = oldLocation + filename
 		var newFilename = newLocation + filename
-		MoveFile(oldFilename, newFilename)	
+		MoveFile(oldFilename, newFilename)
 	}
 }
 
 func GetFileNamesFromDir(dir string) (files []string) {
-    var fileInfoArray = getFilesFromDir(dir)
+	var fileInfoArray = getFilesFromDir(dir)
 
-    for i := 0; i < len(fileInfoArray); i++ {
-        filename := fileInfoArray[i].Name()
-        files = append(files, filename)
-    }
-    return
+	for i := 0; i < len(fileInfoArray); i++ {
+		filename := fileInfoArray[i].Name()
+		files = append(files, filename)
+	}
+	return
 }
 
-func ReadAndPrintFiles(dir string) {
-    var files = getFilesFromDir(dir)
-    for _, file := range files {
-        fmt.Println(file.Name())
-    }
+func GetFileNamesFromDirRecursive(dir string) (files []string) {
+	var fileInfoArray = GetFilesFromDirRecursive(dir)
+
+	for i := 0; i < len(fileInfoArray); i++ {
+		filename := fileInfoArray[i].Name()
+		files = append(files, filename)
+	}
+	return
 }
 
 func ReadAndPrintAllFiles(dir string) {
-    err := filepath.Walk(dir,
-        func(path string, info os.FileInfo, err error) error {
-            if err != nil {
-                return err
-            }
-            fmt.Println(path, info.Size())
-            return nil  
-            })  
-    if err != nil {
-        log.Println(err)
-    }
+	err := filepath.Walk(dir,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			fmt.Println(path, info.Size())
+			return nil
+		})
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func getFilesFromDir(dir string) (files []os.FileInfo) {
 	files, err := ioutil.ReadDir(dir)
-    if err != nil {
-        log.Fatal(err)
-    }
-    return
+	if err != nil {
+		log.Fatal(err)
+	}
+	return
 }
 
+func GetFilesFromDirRecursive(dir string) (files []FullFileInfo) {
+	err := filepath.Walk(dir,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			var file FullFileInfo
+			file.FileInfo = info
+			file.Path = path
+			files = append(files, file)
+
+			return nil
+		})
+	if err != nil {
+		log.Println(err)
+	}
+
+	return files
+}
 
 func IsFolder(filename string) (isFolder bool) {
-    info, _ := os.Stat(filename)
-    return info.IsDir() 
-}
+	info, err := os.Stat(filename)
 
-func GetNumberOfFiles(dir string) (num int) {
-    err := filepath.Walk(dir,
-        func(path string, info os.FileInfo, err error) error {
-            if err != nil {
-                return err
-            }
-            num++
-            return nil
-            })  
-    if err != nil {
-        log.Println(err)
-    }
-
-    return num
+	if err != nil {
+		return false
+	}
+	return info.IsDir()
 }

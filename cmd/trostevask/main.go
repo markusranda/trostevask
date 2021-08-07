@@ -4,6 +4,7 @@ import (
 	"github.com/markusranda/trostevask/pkg/cleaner"
 	"github.com/markusranda/trostevask/pkg/filemanager"
 	"github.com/markusranda/trostevask/pkg/printer"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -15,13 +16,10 @@ func main() {
 	setupTestEnvironment()
 
 	printer.PrintColoredText("Read all dirty files", printer.YELLOW)
-	filemanager.ReadAndPrintFiles("./test_files/dirty")
+	filemanager.ReadAndPrintAllFiles("./test_files/dirty")
 
 	printer.PrintColoredText("Cleaning up filenames", printer.YELLOW)
 	cleanFilenames()
-
-	printer.PrintColoredText("Read all cleaned files", printer.YELLOW)
-	filemanager.ReadAndPrintAllFiles("./test_files/clean")
 }
 
 func setupTestEnvironment() {
@@ -34,6 +32,7 @@ func setupTestEnvironment() {
 		"Black Swan 2010 dddddd.mkv",
 		"2001.A.Space.Odyssey.1968.720p.BluRay.DD5.1.x264-LiNG.mkv",
 	}
+
 	generateMovieTestFiles(movieTestFiles)
 
 	tvShowTestFiles := []string{
@@ -52,19 +51,23 @@ func setupTestEnvironment() {
 
 func generateTvShowTestFiles(testFiles []string) {
 	for i := 0; i < len(testFiles); i++ {
-		filemanager.CreateDir("./test_files/dirty/" + testFiles[i], 0755)
+		filemanager.CreateDir("./test_files/dirty/"+testFiles[i], 0755)
 	}
-	
+
 	filemanager.CreateFile("./test_files/dirty/True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
-	"True.Detective.S01E01.1080p.BluRay.10bit.x265-POIASD.mkv");
-	filemanager.CreateFile("./test_files/dirty/True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/", 
-	"True.Detective.S01E02.1080p.BluRay.10bit.x265-POIASD.mkv");
-	filemanager.CreateFile("./test_files/dirty/True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/", 
-	"True.Detective.S01E03.1080p.BluRay.10bit.x265-POIASD.mkv");
-	filemanager.CreateFile("./test_files/dirty/True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/", 
-	"True.Detective.S01E04.1080p.BluRay.10bit.x265-POIASD.mkv");
-	filemanager.CreateFile("./test_files/dirty/", 
-	"Batwoman.S02E07.XviD-AFG[TGx]");
+		"True.Detective.S01E01.1080p.BluRay.10bit.x265-POIASD.mkv")
+	filemanager.CreateFile("./test_files/dirty/True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
+		"True.Detective.S01E02.1080p.BluRay.10bit.x265-POIASD.mkv")
+	filemanager.CreateFile("./test_files/dirty/True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
+		"True.Detective.S01E03.1080p.BluRay.10bit.x265-POIASD.mkv")
+	filemanager.CreateFile("./test_files/dirty/True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
+		"True.Detective.S01E04.1080p.BluRay.10bit.x265-POIASD.mkv")
+	filemanager.CreateFile("./test_files/dirty/True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
+		"True.Detective.S1E01.1080p.BluRay.10bit.x265-POIASD.mkv")
+	filemanager.CreateFile("./test_files/dirty/",
+		"Batwoman.S02E07.XviD-AFG[TGx]")
+	filemanager.CreateFile("./test_files/dirty/",
+		"Batwoman.S02E08.XviD-AFG[TGx].mkv")
 }
 
 func generateMovieTestFiles(testFiles []string) {
@@ -74,30 +77,64 @@ func generateMovieTestFiles(testFiles []string) {
 }
 
 func cleanFilenames() {
-	var fileNameList = filemanager.GetFileNamesFromDir("./test_files/dirty/")
+	baseDir := "./test_files/"
+	basePathProcessing := baseDir + "dirty/"
+	basePathClean := baseDir + "clean/"
+	basePathRejected := baseDir + "rejected/"
 
-	basePathProcessing := "./test_files/dirty/"
-	basePathClean := "./test_files/clean/"
-	basePathRejected := "./test_files/rejected/"
+	var fileList = filemanager.GetFilesFromDirRecursive(basePathProcessing)
 
-	for _, filename := range fileNameList {
+	for _, file := range fileList {
 
-		println("Cleaning file: " + filename)
-
-		cleanFilename := cleaner.GetCleanFilename(filename, basePathProcessing)
-
-		if (cleanFilename == "") {
-			printer.PrintColoredText("Got empty cleaned filename for: " + filename, printer.RED)
-			filemanager.MoveFile(basePathProcessing + filename, basePathRejected + filename)
+		// Skipping dirs
+		if filemanager.IsFolder(file.Path) {
+			log.Debug("Skipping file: " + file.Name())
 			continue
 		}
 
-		filemanager.MoveFile(basePathProcessing + filename, basePathClean + cleanFilename)
+		log.Info("Cleaning file: " + file.Name())
+
+		if cleaner.IsNotValidated(file) {
+			rejectFile(basePathRejected, file)
+			continue
+		}
+
+		cleanFile := cleaner.GetCleanFilename(file)
+
+		if cleanFile.Name() == "" {
+			log.Error("Got empty cleaned file for: " + file.Name())
+			rejectFile(basePathRejected, file)
+			continue
+		}
+
+		log.Info("Moving file: " + cleanFile.Path)
+		err := filemanager.CopyFile(file.Path, basePathClean+cleanFile.Path)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
+func rejectFile(rejectDir string, file filemanager.FullFileInfo) {
+	log.Error("Moving file to rejected: " + file.Name())
+	err := filemanager.CopyFile(file.Path, rejectDir+file.Name())
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
 func disposeFiles() {
 	println("Disposing all files")
-	filemanager.RemoveContents("./test_files/dirty/")
-	filemanager.RemoveContents("./test_files/clean/")
+	err := filemanager.RemoveContents("./test_files/dirty/")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = filemanager.RemoveContents("./test_files/clean/")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = filemanager.RemoveContents("./test_files/rejected/")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
