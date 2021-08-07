@@ -4,13 +4,13 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/markusranda/trostevask/pkg/cleaner"
 	"github.com/markusranda/trostevask/pkg/filemanager"
-	"github.com/markusranda/trostevask/pkg/printer"
 	log "github.com/sirupsen/logrus"
 	"os"
 )
 
 func main() {
-	printer.PrintColoredText("---------------------Started trostevask---------------------", printer.YELLOW)
+	initLogger()
+	log.Info("---------------------Started trostevask---------------------")
 
 	err := godotenv.Load()
 	if err != nil {
@@ -33,11 +33,15 @@ func main() {
 		}
 	}
 
-	printer.PrintColoredText("Read all dirty files", printer.YELLOW)
+	log.Info("Read all dirty files")
 	filemanager.ReadAndPrintAllFiles(filemanager.GetInputDir())
 
-	printer.PrintColoredText("Cleaning up filenames", printer.YELLOW)
+	log.Info("Cleaning up filenames")
 	cleanFilenames()
+}
+
+func initLogger() {
+	log.SetOutput(os.Stdout)
 }
 
 func initBaseDirs() {

@@ -40,7 +40,6 @@ func IsNotValidated(file filemanager.FullFileInfo) bool {
 	re := regexp.MustCompile(`(?m).+mp4|avi|mkv`)
 	validFileExtensionExists := re.MatchString(file.Name())
 	if !validFileExtensionExists {
-		logrus.Error("Invalid or missing file extension: " + file.Name())
 		return true
 	}
 
