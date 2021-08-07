@@ -63,7 +63,7 @@ func CreateDirSkipIfExists(dir string, permissions os.FileMode) {
 
 func CreateDirIfNotExists(dir string, permissions os.FileMode) {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		err := os.Mkdir(dir, permissions)
+		err := os.MkdirAll(dir, permissions)
 		if err != nil {
 			logrus.Fatal(err)
 		}
@@ -214,4 +214,31 @@ func IsFolder(filename string) (isFolder bool) {
 		return false
 	}
 	return info.IsDir()
+}
+
+func GetInputDir() (baseDir string) {
+	baseDir = os.Getenv("input_dir")
+	last := baseDir[len(baseDir)-1:]
+	if last != "/" {
+		baseDir += "/"
+	}
+	return baseDir
+}
+
+func GetOutputDir() (baseDir string) {
+	baseDir = os.Getenv("output_dir")
+	last := baseDir[len(baseDir)-1:]
+	if last != "/" {
+		baseDir += "/"
+	}
+	return baseDir
+}
+
+func GetRejectedtDir() (baseDir string) {
+	baseDir = os.Getenv("rejected_dir")
+	last := baseDir[len(baseDir)-1:]
+	if last != "/" {
+		baseDir += "/"
+	}
+	return baseDir
 }

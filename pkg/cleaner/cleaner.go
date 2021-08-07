@@ -20,11 +20,11 @@ func GetCleanFilename(file filemanager.FullFileInfo) (cleanFile filemanager.Full
 			// If no tv show tvShowName found return empty
 			return
 		}
-		filemanager.CreateDirIfNotExists("./test_files/clean/tv_shows/"+tvShowName, 0755)
+		filemanager.CreateDirIfNotExists(filemanager.GetOutputDir()+"tv_shows/"+tvShowName, 0755)
 
 		// Handle season
 		tvShowSeason := grabSeason(file.Name())
-		filemanager.CreateDirIfNotExists("./test_files/clean/tv_shows/"+tvShowName+"/season_"+tvShowSeason, 0755)
+		filemanager.CreateDirIfNotExists(filemanager.GetOutputDir()+"tv_shows/"+tvShowName+"/season_"+tvShowSeason, 0755)
 
 		// Handle full name
 		cleanFile.Path = "tv_shows/" + tvShowName + "/season_" + tvShowSeason + "/" + renamer.CleanTvShowName(file.Name())

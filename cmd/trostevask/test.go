@@ -18,7 +18,7 @@ func setupTestEnvironment() {
 
 	generateMovieTestFiles(movieTestFiles)
 
-	tvShowTestFiles := []string{
+	tvShowTestDirs := []string{
 		"Bobs.Burgers.S04E12.WEB.x264-PHOENiX[TGx]",
 		"Stargate SG1 Complete 1997-2007 DVD Rip x264 AC3-MEECH",
 		"Stargate Atlantis S01-05 BR 10bit ace hevc-",
@@ -26,30 +26,28 @@ func setupTestEnvironment() {
 		"Bleach Season 13 English Dubbed HD",
 		"True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD",
 	}
-	generateTvShowTestFiles(tvShowTestFiles)
 
-	filemanager.CreateDirSkipIfExists("./test_files/clean/movies", 0755)
-	filemanager.CreateDirSkipIfExists("./test_files/clean/tv_shows", 0755)
+	generateTvShowTestFiles(tvShowTestDirs)
 }
 
-func generateTvShowTestFiles(testFiles []string) {
-	for i := 0; i < len(testFiles); i++ {
-		filemanager.CreateDirSkipIfExists("./test_files/dirty/"+testFiles[i], 0755)
+func generateTvShowTestFiles(tvShowTestDirs []string) {
+	for i := 0; i < len(tvShowTestDirs); i++ {
+		filemanager.CreateDirSkipIfExists(filemanager.GetInputDir()+tvShowTestDirs[i], 0755)
 	}
 
-	filemanager.CreateFileSkipIfExists("./test_files/dirty/True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
+	filemanager.CreateFileSkipIfExists(filemanager.GetInputDir()+"True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
 		"True.Detective.S01E01.1080p.BluRay.10bit.x265-POIASD.mkv")
-	filemanager.CreateFileSkipIfExists("./test_files/dirty/True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
+	filemanager.CreateFileSkipIfExists(filemanager.GetInputDir()+"True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
 		"True.Detective.S01E02.1080p.BluRay.10bit.x265-POIASD.mkv")
-	filemanager.CreateFileSkipIfExists("./test_files/dirty/True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
+	filemanager.CreateFileSkipIfExists(filemanager.GetInputDir()+"True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
 		"True.Detective.S01E03.1080p.BluRay.10bit.x265-POIASD.mkv")
-	filemanager.CreateFileSkipIfExists("./test_files/dirty/True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
+	filemanager.CreateFileSkipIfExists(filemanager.GetInputDir()+"True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
 		"True.Detective.S01E04.1080p.BluRay.10bit.x265-POIASD.mkv")
-	filemanager.CreateFileSkipIfExists("./test_files/dirty/True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
+	filemanager.CreateFileSkipIfExists(filemanager.GetInputDir()+"True.Detective.Season.1.S01.1080p.BluRay.10bit.x265-POIASD/",
 		"True.Detective.S1E01.1080p.BluRay.10bit.x265-POIASD.mkv")
-	filemanager.CreateFileSkipIfExists("./test_files/dirty/",
+	filemanager.CreateFileSkipIfExists(filemanager.GetInputDir(),
 		"Batwoman.S02E07.XviD-AFG[TGx]")
-	filemanager.CreateFileSkipIfExists("./test_files/dirty/",
+	filemanager.CreateFileSkipIfExists(filemanager.GetInputDir(),
 		"Batwoman.S02E08.XviD-AFG[TGx].mkv")
 }
 
