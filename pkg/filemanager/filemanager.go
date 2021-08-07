@@ -79,13 +79,13 @@ func ReadAndPrintFiles(dir string) {
 
 func ReadAndPrintAllFiles(dir string) {
     err := filepath.Walk(dir,
-    func(path string, info os.FileInfo, err error) error {
-    if err != nil {
-        return err
-    }
-    fmt.Println(path, info.Size())
-        return nil  
-    })  
+        func(path string, info os.FileInfo, err error) error {
+            if err != nil {
+                return err
+            }
+            fmt.Println(path, info.Size())
+            return nil  
+            })  
     if err != nil {
         log.Println(err)
     }
@@ -99,7 +99,24 @@ func getFilesFromDir(dir string) (files []os.FileInfo) {
     return
 }
 
+
 func IsFolder(filename string) (isFolder bool) {
     info, _ := os.Stat(filename)
     return info.IsDir() 
+}
+
+func GetNumberOfFiles(dir string) (num int) {
+    err := filepath.Walk(dir,
+        func(path string, info os.FileInfo, err error) error {
+            if err != nil {
+                return err
+            }
+            num++
+            return nil
+            })  
+    if err != nil {
+        log.Println(err)
+    }
+
+    return num
 }
