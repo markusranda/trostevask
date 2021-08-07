@@ -85,6 +85,11 @@ func cleanFilenames() {
 			continue
 		}
 
+		if filemanager.FileExists(filemanager.GetOutputDir() + cleanFile.Path) {
+			log.Info("Skipping, file already exists")
+			continue
+		}
+
 		log.Info("Copying file: " + cleanFile.Path)
 		err := filemanager.CopyFile(file.Path, filemanager.GetOutputDir()+cleanFile.Path)
 		if err != nil {

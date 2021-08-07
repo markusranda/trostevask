@@ -242,3 +242,20 @@ func GetRejectedtDir() (baseDir string) {
 	}
 	return baseDir
 }
+
+func FileExists(dest string) bool {
+	if _, err := os.Stat(dest); err == nil {
+		// path/to/whatever exists
+		return true
+
+	} else if os.IsNotExist(err) {
+		// path/to/whatever does *not* exist
+		return false
+	} else {
+		// Schrodinger: file may or may not exist. See err for details.
+
+		// Therefore, do *NOT* use !os.IsNotExist(err) to test for file existence
+		return true
+
+	}
+}
