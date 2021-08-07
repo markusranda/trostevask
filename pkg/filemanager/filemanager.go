@@ -38,10 +38,26 @@ func CreateFile(dir string, filename string) {
 	}
 }
 
+func CreateFileSkipIfExists(dir string, filename string) {
+	bytes := []byte(filename)
+	err := ioutil.WriteFile(dir+filename, bytes, 0644)
+
+	if err != nil {
+		return
+	}
+}
+
 func CreateDir(dir string, permissions os.FileMode) {
 	err := os.Mkdir(dir, permissions)
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func CreateDirSkipIfExists(dir string, permissions os.FileMode) {
+	err := os.Mkdir(dir, permissions)
+	if err != nil {
+		return
 	}
 }
 
