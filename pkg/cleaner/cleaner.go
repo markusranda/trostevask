@@ -1,48 +1,55 @@
 package cleaner
 
 import (
+	uuid2 "github.com/google/uuid"
 	"github.com/markusranda/trostevask/pkg/filemanager"
 	"github.com/markusranda/trostevask/pkg/renamer"
 	"github.com/sirupsen/logrus"
 	"regexp"
-	"strconv"
 )
 
-func CleanFilenames() {
+func CleanAllFilenames() {
 	var fileList = filemanager.GetFilesFromDirRecursive(filemanager.GetInputDir())
 
-	var skipped int
-	var transferred int
-
 	for _, file := range fileList {
+		CleanFileName(file)
+	}
+}
 
-		if shouldSkipFile(file) {
+func CleanFileName(file filemanager.FullFileInfo) {
+	uuid := uuid2.New().String()
+	if shouldSkipFile(file) {
+		if file.FileInfo != nil {
 			logrus.Debug("Skipping file: " + file.Name())
-			skipped++
-			continue
+		} else {
+			logrus.Debug("Skipping file corrupt file")
 		}
-
-		logrus.Info("Cleaning file: " + file.Name())
-		cleanFile := renamer.GetCleanFilename(file)
-
-		if filemanager.FileExists(filemanager.GetOutputDir() + cleanFile.Path) {
-			logrus.Info("Skipping, file already exists")
-			continue
-		}
-
-		logrus.Info("Copying file: " + cleanFile.Path)
-		err := filemanager.CopyFile(file.Path, filemanager.GetOutputDir()+cleanFile.Path)
-		if err != nil {
-			logrus.Fatal(err)
-		}
+		return
 	}
 
-	logrus.Info("Skipped " + strconv.Itoa(skipped) + " of " + strconv.Itoa(len(fileList)) + " files.")
-	logrus.Info("Transferred " + strconv.Itoa(transferred) + " of " + strconv.Itoa(len(fileList)) + " files.")
+	logrus.Infof("[%s] Cleaning file: %s", uuid, file.Name())
+	cleanFile := renamer.GetCleanFilename(file)
+
+	if filemanager.FileExists(filemanager.GetOutputDir() + cleanFile.Path) {
+		logrus.Infof("[%s] Skipping, file already exists", uuid)
+		return
+	}
+
+	logrus.Infof("[%s] Copying file: %s", uuid, cleanFile.Path)
+	err := filemanager.CopyFile(file.Path, filemanager.GetOutputDir()+cleanFile.Path)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	logrus.Infof("[%s] File copy complete!", uuid)
 }
 
 func shouldSkipFile(file filemanager.FullFileInfo) bool {
-	return IsNotValid(file) || filemanager.IsFolder(file.Path)
+	if file.FileInfo == nil {
+		logrus.Error("File is missing FullFileInfo field")
+		return true
+	}
+
+	return file.Name() == "dirty" || IsNotValid(file) || filemanager.IsFolder(file.Path)
 }
 
 func IsNotValid(file filemanager.FullFileInfo) bool {

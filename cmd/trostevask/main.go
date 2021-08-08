@@ -4,6 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/markusranda/trostevask/pkg/cleaner"
 	"github.com/markusranda/trostevask/pkg/filemanager"
+	"github.com/markusranda/trostevask/pkg/sniffer"
 	log "github.com/sirupsen/logrus"
 	"os"
 )
@@ -20,24 +21,28 @@ func main() {
 	initBaseDirs()
 	handleArguments()
 
-	log.Info("Cleaning up filenames")
-	cleaner.CleanFilenames()
+	log.Info("Doing initial scan of incoming dir, and running cleanup")
+	log.Info("Cleaning up filenames...")
+	cleaner.CleanAllFilenames()
 
-	log.Info("All done!")
+	log.Info("Start sniffing for file changes..")
+	done := make(chan bool)
+	go sniffer.Sniff()
+
+	<-done
 }
 
 func handleArguments() {
-	argsWithProg := os.Args
-	if len(argsWithProg) > 1 {
-		for _, arg := range argsWithProg {
+	arguments := os.Args[1:]
+	for _, arg := range arguments {
+		if arg == "dispose" {
+			disposeFiles()
+		}
+	}
 
-			if arg == "dispose" {
-				disposeFiles()
-			}
-
-			if arg == "test" {
-				setupTestEnvironment()
-			}
+	for _, arg := range arguments {
+		if arg == "test" {
+			setupTestEnvironment()
 		}
 	}
 }
@@ -60,25 +65,18 @@ func initBaseDirs() {
 	filemanager.CreateDirSkipIfExists(outputDir+"tv_shows", 0755)
 }
 
-func rejectFile(file filemanager.FullFileInfo) {
-	log.Error("Moving file to rejected: " + file.Name())
-	err := filemanager.CopyFile(file.Path, filemanager.GetRejectedDir()+file.Name())
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func disposeFiles() {
 	log.Info("Disposing all files")
-	err := filemanager.RemoveContents("./test_files/dirty/")
+	err := filemanager.RemoveContents(filemanager.GetInputDir())
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = filemanager.RemoveContents("./test_files/clean/")
+	err = filemanager.RemoveContents(filemanager.GetOutputDir() + "movies/")
+	err = filemanager.RemoveContents(filemanager.GetOutputDir() + "tv_shows/")
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = filemanager.RemoveContents("./test_files/rejected/")
+	err = filemanager.RemoveContents(filemanager.GetRejectedDir())
 	if err != nil {
 		log.Fatal(err)
 	}

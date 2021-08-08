@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/markusranda/trostevask/pkg/filemanager"
 	log "github.com/sirupsen/logrus"
+	"math/rand"
+	"time"
 )
 
 func setupTestEnvironment() {
@@ -37,6 +39,34 @@ func setupTestEnvironment() {
 	generateTvShowTestFiles(tvShowTestDirs, testFiles)
 }
 
+func setupDelayedExtraFiles() {
+	movieTestFiles := []string{
+		"The.Favourite.2.2020.1080p.BluRay.x264.DTS-WiKi.mkv",
+		"Pirates of the carribEan the world is kill 2006 blurAy xHaxx0r.mp4",
+		"jason_borne_identity_crisis_2069 CONTRIBUTE TO MOVIEMASTERS.mp4",
+		"the greatest escapism (1969).mkv",
+		"Grey Swan 2011 dddddd.mkv",
+		"2002.A.Space.Adventure.1969.720p.BluRay.DD5.1.x264-LiNG.mkv",
+	}
+
+	for i := 0; i < len(movieTestFiles); i++ {
+		go createDelayedFile(movieTestFiles[i])
+	}
+}
+
+func createDelayedFile(file string) {
+	time.AfterFunc(getRandomDuration(), func() {
+		filemanager.CreateFileSkipIfExists(filemanager.GetInputDir(), file)
+	})
+}
+
+func getRandomDuration() time.Duration {
+	rand.Seed(time.Now().UnixNano())
+	n := rand.Intn(15) // n will be between 0 and 10
+
+	return time.Duration(n) * time.Second
+}
+
 func generateTvShowTestFiles(tvShowTestDirs []string, testFiles []string) {
 	for i := 0; i < len(tvShowTestDirs); i++ {
 		filemanager.CreateDirSkipIfExists(filemanager.GetInputDir()+tvShowTestDirs[i], 0755)
@@ -64,6 +94,6 @@ func generateTvShowTestFiles(tvShowTestDirs []string, testFiles []string) {
 
 func generateMovieTestFiles(testFiles []string) {
 	for i := 0; i < len(testFiles); i++ {
-		filemanager.CreateFileSkipIfExists("./test_files/dirty/", testFiles[i])
+		filemanager.CreateFileSkipIfExists(filemanager.GetInputDir(), testFiles[i])
 	}
 }
