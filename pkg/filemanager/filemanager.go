@@ -5,7 +5,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -34,7 +33,7 @@ func CreateFile(dir string, filename string) {
 	err := ioutil.WriteFile(dir+filename, bytes, 0644)
 
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 }
 
@@ -50,7 +49,7 @@ func CreateFileSkipIfExists(dir string, filename string) {
 func CreateDir(dir string, permissions os.FileMode) {
 	err := os.Mkdir(dir, permissions)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 }
 
@@ -174,14 +173,14 @@ func ReadAndPrintAllFiles(dir string) {
 			return nil
 		})
 	if err != nil {
-		log.Println(err)
+		logrus.Error(err)
 	}
 }
 
 func getFilesFromDir(dir string) (files []os.FileInfo) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	return
 }
@@ -201,7 +200,7 @@ func GetFilesFromDirRecursive(dir string) (files []FullFileInfo) {
 			return nil
 		})
 	if err != nil {
-		log.Println(err)
+		logrus.Error(err)
 	}
 
 	return files
@@ -234,7 +233,7 @@ func GetOutputDir() (baseDir string) {
 	return baseDir
 }
 
-func GetRejectedtDir() (baseDir string) {
+func GetRejectedDir() (baseDir string) {
 	baseDir = os.Getenv("rejected_dir")
 	last := baseDir[len(baseDir)-1:]
 	if last != "/" {
@@ -252,7 +251,7 @@ func FileExists(dest string) bool {
 		// path/to/whatever does *not* exist
 		return false
 	} else {
-		// Schrodinger: file may or may not exist. See err for details.
+		// Schrödinger: file may or may not exist. See err for details.
 
 		// Therefore, do *NOT* use !os.IsNotExist(err) to test for file existence
 		return true
