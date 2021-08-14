@@ -44,6 +44,15 @@ func handleArguments() {
 		if arg == "test" {
 			setupTestEnvironment()
 		}
+		if arg == "debug" {
+			// parse string, this is built-in feature of logrus
+			ll, err := log.ParseLevel("debug")
+			if err != nil {
+				ll = log.DebugLevel
+			}
+			// set global log level
+			log.SetLevel(ll)
+		}
 	}
 }
 
