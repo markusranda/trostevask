@@ -2,6 +2,7 @@ package cleaner
 
 import (
 	uuid2 "github.com/google/uuid"
+	"github.com/markusranda/trostevask/pkg/archive-manager"
 	"github.com/markusranda/trostevask/pkg/filemanager"
 	"github.com/markusranda/trostevask/pkg/renamer"
 	"github.com/sirupsen/logrus"
@@ -18,6 +19,12 @@ func CleanAllFilenames() {
 
 func CleanFileName(file filemanager.FullFileInfo) {
 	uuid := uuid2.New().String()
+
+	if archive_manager.IsArchive(file) {
+		logrus.Infof("[%s] File: %s is compressed, decompressing before proceeding..", uuid, file.Name())
+		file = archive_manager.GetMediaFileFromCompressed(file)
+	}
+
 	if shouldSkipFile(file) {
 		if file.FileInfo != nil {
 			logrus.Debug("Skipping file: " + file.Name())
@@ -27,7 +34,7 @@ func CleanFileName(file filemanager.FullFileInfo) {
 		return
 	}
 
-	logrus.Infof("[%s] Cleaning file: %s", uuid, file.Name())
+	logrus.Infof("[%s] Renaming file: %s", uuid, file.Name())
 	cleanFile := renamer.GetCleanFilename(file)
 
 	if filemanager.FileExists(filemanager.GetOutputDir() + cleanFile.Path) {
@@ -49,7 +56,7 @@ func shouldSkipFile(file filemanager.FullFileInfo) bool {
 		return true
 	}
 
-	return file.Name() == "dirty" || IsNotValid(file) || filemanager.IsFolder(file.Path)
+	return file.Name() == "dirty" || filemanager.IsFolder(file.Path) || IsNotValid(file)
 }
 
 func IsNotValid(file filemanager.FullFileInfo) bool {

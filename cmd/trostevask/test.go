@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/markusranda/trostevask/pkg/filemanager"
+	"github.com/mholt/archiver/v3"
 	log "github.com/sirupsen/logrus"
 	"math/rand"
 	"time"
@@ -30,13 +31,46 @@ func setupTestEnvironment() {
 	}
 
 	testFiles := []string{
-		"flame-man.on.fire.2004.proper.1080p.bluray.x264.rar",
+		"flame-man.on.fire.2004.proper.1080p.bluray.x264.txt",
 		"man.on.fire.1080p-japhson.png",
 		"flame-man.on.fire.2004.proper.1080p.bluray.x264.nfo",
 		"man.on.fire.1080p-japhson.png",
 	}
 
 	generateTvShowTestFiles(tvShowTestDirs, testFiles)
+
+	generateArchivedTestMovies()
+}
+
+func generateArchivedTestMovies() {
+	filemanager.CreateDir(filemanager.GetInputDir()+"tmp", 0755)
+
+	movieTestFiles := []string{
+		"tmp/the.tarzan.movie.1.mkv",
+		"tmp/the.tarzan.movie.2.mkv",
+		"tmp/the.tarzan.movie.3.mkv",
+	}
+
+	generateMovieTestFiles(movieTestFiles)
+
+	archives := []string{
+		"the.tarzan.movie.1.tar.gz",
+		"the.tarzan.movie.2.tar",
+		"the.tarzan.movie.3.zip",
+	}
+
+	for i := 0; i < 5; i++ {
+		CreateArchive(archives[i], filemanager.GetInputDir()+movieTestFiles[i])
+	}
+}
+
+func CreateArchive(archiveName string, fileName string) {
+	log.Infof("Creating: %s AND %s", archiveName, fileName)
+	// Create new archive with fileName as source
+	archiveErr := archiver.Archive([]string{fileName}, filemanager.GetInputDir()+archiveName)
+	if archiveErr != nil {
+		log.Error(archiveErr)
+	}
 }
 
 func setupDelayedExtraFiles() {

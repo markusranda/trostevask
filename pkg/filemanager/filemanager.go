@@ -42,7 +42,7 @@ func CreateFileSkipIfExists(dir string, filename string) {
 	err := ioutil.WriteFile(dir+filename, bytes, 0644)
 
 	if err != nil {
-		return
+		logrus.Error(err)
 	}
 }
 

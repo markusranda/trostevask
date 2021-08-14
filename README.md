@@ -16,7 +16,7 @@
 Run the program with different arguments.
 
 - test | The program will create files in input directory to test with.
-- dispose | Will cleanup input directory before proceeding with anything.
+- dispose | Will cleanup input, ouput and rejected directory before proceeding with anything.
 - debug | Will print extra debug messages.
 
 example:
