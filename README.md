@@ -12,7 +12,22 @@
 
 ## Example usage
 
-Create service file
+### Arguments
+Run the program with different arguments.
+
+- test | The program will create files in input directory to test with.
+- dispose | Will cleanup input directory before proceeding with anything.
+- debug | Will print extra debug messages.
+
+example:
+```
+./trostevask debug
+```
+
+It's also possible to run with all arguments at the same time, 
+just add more and separate them with spaces.
+
+###Create service file
 ```
 [Unit]
 Description=Service for cleaning up media files
