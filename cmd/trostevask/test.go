@@ -17,6 +17,7 @@ func setupTestEnvironment() {
 		"the great escape (1963).mkv",
 		"Black Swan 2010 dddddd.mkv",
 		"2001.A.Space.Odyssey.1968.720p.BluRay.DD5.1.x264-LiNG.mkv",
+		"flame-man.on.fire.2004.proper.1080p.bluray.x264-sample.mkv",
 	}
 
 	generateMovieTestFiles(movieTestFiles)
@@ -59,7 +60,7 @@ func generateArchivedTestMovies() {
 		"the.tarzan.movie.3.zip",
 	}
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 3; i++ {
 		CreateArchive(archives[i], filemanager.GetInputDir()+movieTestFiles[i])
 	}
 }

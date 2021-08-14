@@ -62,9 +62,17 @@ func shouldSkipFile(file filemanager.FullFileInfo) bool {
 func IsNotValid(file filemanager.FullFileInfo) bool {
 	re := regexp.MustCompile(`(?m).+mp4|avi|mkv`)
 	validFileExtensionExists := re.MatchString(file.Name())
-	if !validFileExtensionExists {
+
+	isSampleFile := getIsSampleFile(file)
+
+	if !validFileExtensionExists || isSampleFile {
 		return true
 	}
 
 	return false
+}
+
+func getIsSampleFile(file filemanager.FullFileInfo) bool {
+	re := regexp.MustCompile(`(?mi)sample`)
+	return re.MatchString(file.Path)
 }
