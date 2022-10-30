@@ -27,7 +27,7 @@ example:
 It's also possible to run with all arguments at the same time, 
 just add more and separate them with spaces.
 
-### Create service file
+### Create service file named <service-name>.service
 ```
 [Unit]
 Description=Service for cleaning up media files
@@ -51,7 +51,7 @@ Setup:
 ```shell
 sudo cp trostevask.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable echo-server.service
-sudo systemctl start echo-server.service
-sudo systemctl status echo-server.service
+sudo systemctl enable <service-name>.service
+sudo systemctl start <service-name>.service
+sudo systemctl status <service-name>.service
 ```
